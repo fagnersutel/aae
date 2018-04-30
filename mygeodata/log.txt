@@ -1,0 +1,79 @@
+FAILURE:
+Unable to open datasource `/opt/django/mg2/mg2/media/files/userdata2/unknown-users/7d6ab7de-841c-4755-bc0d-9bad5c2d00c7/2018-04-03_20-51-39/in/in' with the following drivers.
+  -> PCIDSK
+  -> netCDF
+  -> JP2OpenJPEG
+  -> PDF
+  -> ESRI Shapefile
+  -> MapInfo File
+  -> UK .NTF
+  -> OGR_SDTS
+  -> S57
+  -> DGN
+  -> OGR_VRT
+  -> REC
+  -> Memory
+  -> BNA
+  -> CSV
+  -> NAS
+  -> GML
+  -> GPX
+  -> LIBKML
+  -> KML
+  -> GeoJSON
+  -> Interlis 1
+  -> Interlis 2
+  -> OGR_GMT
+  -> GPKG
+  -> SQLite
+  -> OGR_DODS
+  -> ODBC
+  -> WAsP
+  -> PGeo
+  -> MSSQLSpatial
+  -> OGR_OGDI
+  -> PostgreSQL
+  -> MySQL
+  -> OpenFileGDB
+  -> XPlane
+  -> DXF
+  -> Geoconcept
+  -> GeoRSS
+  -> GPSTrackMaker
+  -> VFK
+  -> PGDUMP
+  -> OSM
+  -> GPSBabel
+  -> SUA
+  -> OpenAir
+  -> OGR_PDS
+  -> WFS
+  -> HTF
+  -> AeronavFAA
+  -> Geomedia
+  -> EDIGEO
+  -> GFT
+  -> SVG
+  -> CouchDB
+  -> Cloudant
+  -> Idrisi
+  -> ARCGEN
+  -> SEGUKOOA
+  -> SEGY
+  -> XLS
+  -> ODS
+  -> XLSX
+  -> ElasticSearch
+  -> Walk
+  -> Carto
+  -> AmigoCloud
+  -> SXF
+  -> Selafin
+  -> JML
+  -> PLSCENES
+  -> CSW
+  -> VDV
+  -> TIGER
+  -> AVCBin
+  -> AVCE00
+  -> HTTP
