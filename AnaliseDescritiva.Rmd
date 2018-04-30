@@ -1,0 +1,28 @@
+---
+title: "Analise Descritiva"
+output: html_notebook
+---
+##5.1 Descrição univariada
+Nesta sessão vamos ver alguns (mas não todos!) comandos do R para fazer uma análise descritiva de um conjunto de dados.
+
+Uma boa forma de iniciar uma análise descritiva adequada é verificar os tipoa de variáveis disponíveis. Variáveis podem ser classificadas da seguinte forma:
+
+* qualitativas (categóricas)
+* nominais
+* ordinais
+* quantitativas
+* discretas
+* contínuas
+* e podem ser resumidas por tabelas, gráficos e/ou medidas.
+
+Vamos ilustrar estes conceitos com um conjunto de dados já incluído no R, o conjunto mtcars que descreve características de diferentes modelos de automóvel. 
+
+```{r, echo=TRUE}
+data(mtcars)
+mtcars         # mostra todo o conjunto de dados
+dim(mtcars)    # mostra a dimensão dos dados
+mtcars[1:5,]   # mostra as 5 primeiras linhas
+names(mtcars)  # mostra os nomes das variáveis
+help(mtcars)   # mostra documentação do conjunto de dados
+```
+

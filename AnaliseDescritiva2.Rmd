@@ -1,0 +1,418 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+##5.1 Descrição univariada
+Nesta sessão vamos ver alguns (mas não todos!) comandos do R para fazer uma análise descritiva de um conjunto de dados.
+
+Uma boa forma de iniciar uma análise descritiva adequada é verificar os tipoa de variáveis disponíveis. Variáveis podem ser classificadas da seguinte forma:
+
+* qualitativas (categóricas)
+* nominais
+* ordinais
+* quantitativas
+* discretas
+* contínuas
+* e podem ser resumidas por tabelas, gráficos e/ou medidas.
+
+Vamos ilustrar estes conceitos com um conjunto de dados já incluído no R, o conjunto mtcars que descreve características de diferentes modelos de automóvel. 
+
+```{r cars}
+data(mtcars)
+mtcars         # mostra todo o conjunto de dados
+dim(mtcars)    # mostra a dimensão dos dados
+mtcars[1:5,]   # mostra as 5 primeiras linhas
+names(mtcars)  # mostra os nomes das variáveis
+help(mtcars)   # mostra documentação do conjunto de dados
+```
+
+Vamos agora, por simplicidade, selecionar um subconjunto destes dados com apenas algumas das variáveis. Para isto vamos criar um objeto chamado mtc que contém apenas as variáveis desejadas. Para selecioná-las indicamos os números das colunas correspondentes à estas variáveis.
+
+
+```{r}
+mtc <- mtcars[,c(1,2,4,6,9,10)]
+mtc[1:5,]
+names(mtc)
+```
+
+Vamos anexar o objeto para facilitar a digitação com o comando abaixo. O uso e sentido deste comando será explicado mais adiante.
+
+```{r}
+attach(mtc)
+```
+
+Vamos agora ver uma descrição da variável número de cilindros. Vamos fazer uma tabela de frequências absolutas e gráficos de barrase do tipo ``torta``. Depois fazemos o mesmo para frequências relativas.
+
+```{r}
+tcyl <- table(cyl)
+barplot(tcyl)
+pie(tcyl)
+tcyl <- 100* table(cyl)/length(cyl)
+tcyl 
+prop.table(tcyl)   # outra forma de obter freq. rel.
+barplot(tcyl)
+pie(tcyl)
+```
+
+Passando agora para uma variável quantitativa contínua vamos ver o comportamento da variável que mede o rendimento dos carros (em mpg - milhas por galão). Primeiro fazemos uma tabela de frequências, depois gráficos (histograma, box-plot e diagrama ramos-e-folhas) e finalmente obtemos algumas medidas que resumem os dados.
+
+```{r}
+table(cut(mpg, br=seq(10,35, 5)))
+hist(mpg)
+boxplot(mpg)
+stem(mpg)
+summary(mpg)
+```
+
+##5.2 Descrição bivariada
+Vamos primeiro ver o resumo de duas variáveis categóricas: o tipo de marcha e o número de cilindros. Os comandos abaixo mostram como obter uma tabela com o cruzamento destas variáveis e gráficos.
+
+```{r}
+ table(am, cyl)
+ prop.table(table(am, cyl))
+ prop.table(table(am, cyl), margin=1)
+ prop.table(table(am, cyl), margin=2)
+ plot(table(am, cyl))
+ barplot(table(am, cyl), leg=T)
+ barplot(table(am, cyl), beside=T, leg=T)
+```
+
+
+Agora vamos relacionar uma categórica (tipo de câmbio) com uma contínua (rendimento). O primeiro comando abaixo mostra como obter medidas resumo do rendimento para cada tipo de câmbio. A seguir são mostrados alguns tipos de gráficos que podem ser obtidos para descrever o comportamento e associação destas variáveis.
+
+```{r}
+ tapply(mpg, am, summary)
+
+ plot(am, mpg)
+
+ m0 <- mean(mpg[am==0])   # média de rendimento para cambio automático
+ m0
+ m1 <- mean(mpg[am==1])   # média de rendimento para cambio manual
+ m1
+
+ points(c(0,1), c(m0, m1), cex=2,col=2, pch=20)
+
+ par(mfrow=c(1,2))
+ by(hp, am, hist)
+ par(mfrow=c(1,1))
+
+```
+
+Pode-se fazer um teste estatístico (usando o teste $t$) para comparar os redimentos de carros com diferentes tipos de câmbio e/ou com diferentes números de cilindros (usando a análise de variância).
+
+```{r}
+ t.test(mpg[am==0], mpg[am==1])
+
+ tapply(mpg, cyl, mean)
+ plot(cyl,mpg)
+ anova(aov(mpg ~ cyl))
+
+```
+
+Passamos agora para a relação entre duas contínuas (peso e rendimento) que pode ser ilustrada como se segue.
+
+```{r}
+plot(wt, mpg)   # gráfico de rendimento versus peso
+cor(wt, mpg)    # coeficiente de correlação linear de Pearson
+
+```
+
+Podemos ainda usar recusos gráficos para visualizar três variáveis ao mesmo tempo. Veja os gráficos produzidos com os comandos abaixo.
+
+```{r}
+plot(wt, mpg)   # gráfico de rendimento versus peso
+cor(wt, mpg)    # coeficiente de correlação linear de Pearson
+points(wt[cyl==4], mpg[cyl==4], col=2, pch=19)
+points(wt[cyl==6], mpg[cyl==6], col=3, pch=19)
+points(wt[cyl==8], mpg[cyl==8], col=4, pch=19)
+```
+```{r}
+
+
+par(mfrow=c(1,2))
+plot(hp[am==0], mpg[am == 0])
+plot(hp[am==1], mpg[am == 1])
+par(mfrow=c(1,1))
+
+
+```
+
+
+
+## 5.3 Descrevendo um outro conjunto de dados
+Vamos agora utilizar um outro conjunto de dados que já vem disponível com o R - o conjunto airquality.
+
+Estes dados são medidas de: concentração de ozônio (Ozone), radiação solar (Solar.R), velocidade de vento (Wind) e temperatura (Temp) coletados diariamente (Day) por cinco meses (Month).
+
+Primeiramente vamos carregar e visualisar os dados com os comandos:
+
+```{r}
+data(airquality)       # carrega os dados
+airquality             # mostra os dados
+#Vamos agora usar alguns comandos para ``conhecer melhor''os dados:
+
+is.data.frame(airquality)    # verifica se é um data-frame
+names(airquality)            # nome das colunas (variáveis)
+dim(airquality)              # dimensões do data-frame
+help(airquality)             # mostra o ``help''que explica os dados
+
+```
+
+Bem, agora que conhecemos melhor o conjunto airquality, sabemos o número de dados, seu formato, o número de nome das variáveis podemos começar a analisá-los.
+
+Veja por exemplo alguns comandos:
+
+```{r}
+ summary(airquality)             # rápido sumário das variáveis
+ summary(airquality[,1:4])       # rápido sumário apenas das 4 primeiras variáveis
+ mean(airquality$Temp)           # média das temperaturas no período
+ mean(airquality$Ozone)          # média do Ozone no período - note a resposta NA
+ airquality$Ozone                # a razão é que existem ``dados perdidos'' na variável Ozone
+ mean(airquality$Ozone, na.rm=T) # média do Ozone no período - retirando 
+
+```
+
+valores perdidos
+Note que os útimos tres comandos são trabalhosos de serem digitados pois temos que digitar airquality a cada vez! 
+Mas há um mecanismo no R para facilitar isto: o caminho de procura (``search path''). Começe digitando e vendo s saída de: 
+search()
+
+O programa vai mostrar o caminho de procura dos objetos. Ou seja, quando voce usa um nome do objeto o R vai procurar este objeto nos caminhos indicado, na ordem apresentada.
+
+Pois bem, podemos ``adicionar'' um novo local neste caminho de procura e este novo local pode ser o nosso objeto airquality. Digite o seguinte e compare com o anterior:
+```{r}
+ attach(airquality)   # anexando o objeto airquality no caminho de procura.
+ search()             # mostra o caminho agora com o airquality incluído  
+ mean(Temp)           # e ... a digitação fica mais fácil e rápida !!!!
+ mean(Ozone, na.rm=T) # pois com o airquality anexado o R acha as variáveis
+
+```
+
+NOTA: Para retirar o objeto do caminho de procura basta digitar detach(airquality).
+
+Bem, agora é com voce! 
+Reflita sobre os dados e use seus conhecimentos de estatística para fazer uma análise descritiva interessante destes dados.
+
+Pense em questões relevantes e veja como usar medidas e gráficos para respondê-las. Use os comandos mostrados anteriormente. Por exemplo:
+
+as médias mensais variam entre si?
+como mostrar a evolução das variáveis no tempo?
+as variáveis estão relacionadas?
+etc, etc, etc
+
+
+```{r}
+setwd("~/R-files/")
+milsa <- read.csv("Milsa.csv", header = T, sep = ";")
+milsa
+fix(milsa)                    # comando a ser usado para correções, se necessário
+```
+A planilha digitada como está ainda não está pronta. Precisamos informar para o programa que as variáveis civil, instrucao e regiao, NÃO são numéricas e sim categóricas. No R variáveis categóricas são definidas usando o comando factor(), que vamos usar para redefinir nossas variáveis conforme os comandos a seguir. Primeiro redefinimos a variável civil com os rótulos (labels) solteiro e casado associados aos níveis (levels) 1 e 2. Para variável intrução usamos o argumento adicional ordered = TRUE para indicar que é uma variável ordinal. Na variável regiao codificamos assim: 2=capital, 1=interior, 3=outro. Ao final inspecionamos os dados digitando o nome do objeto.
+```{r}
+milsa$civil <- factor(milsa$civil, label=c("solteiro", "casado"), levels=1:2)
+milsa$instrucao <- factor(milsa$instrucao, label=c("1oGrau", "2oGrau", "Superior"), lev=1:3, ord=T)
+milsa$regiao <- factor(milsa$regiao, label=c("capital", "interior", "outro"), lev=c(2,1,3)) 
+milsa
+
+```
+
+Agora que os dados estão prontos podemos começar a análise descritiva. Inspecionem os comandos a seguir. Sugerimos que o leitor use o R para reproduzir os resultados mostrados no texto dos capítulos 1 a 3 do livro de Bussab & Morettin relacionados com este exemplo.
+
+Além disto precisamos definir uma variável única idade a partir das variáveis ano e mes que foram digitadas. Para gerar a variável idade (em anos) fazemos:
+```{r}
+milsa$idade <- milsa$ano + milsa$mes/12
+milsa$idade
+is.data.frame(milsa) # conferindo se é um data-frame
+names(milsa)         # vendo o nome das variáveis
+dim(milsa)           # vendo as dimensões do data-frame
+
+attach(milsa)        # anexando ao caminho de procura
+
+##
+## Análise Univariada
+##
+
+## 1. Variável Qualitativa Nominal
+civil
+is.factor(civil)
+## 1.1 Tabela:
+civil.tb <- table(civil)
+civil.tb
+## ou em porcentagem
+100 * table(civil)/length(civil)
+## ou então
+prop.table(civil.tb)
+
+## 1.2 Gráfico
+## Para máquinas com baixa resolução gráfica (Sala A - LABEST)
+## use o comando da próxima linha (sem os caracteres ##)
+## X11(colortype="pseudo.cube")
+pie(table(civil))
+
+## 1.3 Medidas
+## encontrando a moda
+civil.mo <- names(civil.tb)[civil.tb == max(civil.tb)]
+civil.mo
+
+## 2 Qualitativa Ordinal
+instrucao
+is.factor(instrucao)
+
+## 2.1 Tabela:
+instrucao.tb <- table(instrucao)
+instrucao.tb                               
+prop.table(instrucao.tb)
+                               
+## 2.2 Gráfico:
+barplot(instrucao.tb)
+
+## 2.3 Medidas
+instrucao.mo <- names(instrucao.tb)[instrucao.tb == max(instrucao.tb)]
+instrucao.mo
+
+median(as.numeric(instrucao)) # só calcula mediana de variáveis numéricas
+levels(milsa$instrucao)[median(as.numeric(milsa$instrucao))]
+
+## 3 Quantitativa discreta
+filhos
+
+## 3.1 Tabela:
+filhos.tb <- table(filhos)
+filhos.tb
+filhos.tb/sum(filhos.tb) # frequências relativas
+
+## 3.2 Gráfico:
+plot(filhos.tb)            # gráfico das frequências absolutas
+filhos.fac <- cumsum(filhos.tb)
+filhos.fac                 # frequências acumuladas
+plot(filhos.fac, type="s") # gráfico das frequências acumuladas
+
+## 3.3 Medidas
+## De posição
+filhos.mo <- names(filhos.tb)[filhos.tb == max(filhos.tb)]
+filhos.mo                  # moda
+
+filhos.md <- median(filhos, na.rm=T)
+filhos.md                  # mediana
+
+filhos.me <- mean(filhos, na.rm=T)
+filhos.me                  # média
+
+## Medida de dispersão
+range(filhos, na.rm=T)
+diff(range(filhos, na.rm=T)) # amplitude
+
+filhos.dp <- sd(filhos, na.rm=T)   # desvio padrão
+filhos.dp
+var(filhos, na.rm=T)       # variância
+
+100 * filhos.dp/filhos.me  # coeficiente de variação
+
+filhos.qt <- quantile(filhos, na.rm=T)
+filhos.qt[4] - filhos.qt[2] # amplitude interquartílica 
+
+summary(filhos)            # várias medidas
+
+## 4. Quantitativa Contínua
+salario
+
+## 4.1 Tabela
+range(salario)          # máximo e mínimo
+nclass.Sturges(salario) # número de classes pelo critério de Sturges
+args(cut)
+args(cut.default)
+table(cut(salario, seq(3.5,23.5,l=8)))
+
+## 4.2 Gráfico
+hist(salario)
+hist(salario, br=seq(3.5,23.5,l=8))
+boxplot(salario)
+stem(salario)
+## 4.3 Medidas
+## De posição
+salario.md <- median(salario, na.rm=T)
+salario.md                # mediana
+
+salario.me <- mean(salario, na.rm=T)
+salario.me                # média
+
+## Medida de dispersão
+range(salario, na.rm=T)
+diff(range(salario, na.rm=T)) # amplitude
+
+salario.dp <- sd(salario, na.rm=T)   # desvio padrão
+salario.dp
+var(salario, na.rm=T)     # variância
+
+100 * salario.dp/salario.me  # coeficiente de variação
+
+salario.qt <- quantile(salario, na.rm=T)
+salario.qt[4] - salario.qt[2] # amplitude interquartílica 
+
+summary(salario)          # várias medidas
+
+##
+## Análise Bivariada
+## 
+## 1. Qualitativa vs Qualitativa
+## Ex. estado civil e grau de instrução 
+
+## 1.1 Tabela
+civ.gi.tb <- table(civil, instrucao) # frequências absolutas
+civ.gi.tb
+civ.gi.tb/as.vector(table(civil))    # frequências por linha
+
+## 1.2 Gráfico
+plot(civ.gi.tb)
+barplot(civ.gi.tb)
+barplot(t(civ.gi.tb))
+
+## 1.3. Medida de associação
+summary(civ.gi.tb)   # resumo incluindo o teste Chi-quadrado
+## criando uma nova variável para agrupar 2o Grau e Superior
+instrucao1 <- ifelse(instrucao == 1, 1, 2)
+table(instrucao)
+table(instrucao1)
+table(civil, instrucao1)
+summary(table(civil, instrucao1))
+
+## 2. Qualitativa vs Quantitativa
+## Ex. grau de instrução vs salário 
+
+## 2.1 Tabela
+quantile(salario)
+ins.sal.tb <- table(instrucao, cut(salario, quantile(salario)))
+ins.sal.tb
+
+## 2.2 Gráfico
+plot(instrucao, salario)
+plot(salario, instrucao)
+
+## 2.3 Medidas
+## calculando as média para cada grau de instrução
+tapply(salario, instrucao, mean)
+## e as variâncias
+tapply(salario, instrucao, var)
+## e ainda os mínimo, máximo e quartis
+tapply(salario, instrucao, quantile)
+
+## 3. Quantitativa vs Quantitativa
+## Ex. salário e idade
+
+## 3.1 Tabela
+table(cut(idade, quantile(idade)), cut(salario, quantile(salario)))
+table(cut(idade, quantile(idade, seq(0,1,len=4))), cut(salario, quantile(salario, seq(0,1,len=4))))
+
+## 3.2 Gráfico
+plot(idade, salario)
+
+## 3.3 Medidas
+cor(idade, salario)
+
+detach(milsa)             # desanexando do caminha de procura
+```
+
