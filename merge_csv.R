@@ -1,8 +1,6 @@
 
-setwd("C:/Users/fsmoura/Desktop/docs/")
-
-files <- list.files('geo/')
-filenames <- list.files(path = "C:/Users/fsmoura/Desktop/docs/geo/") 
+setwd("/Users/fagnersuteldemoura/Desktop/aae-master/")
+filenames <- list.files(path = "/Users/fagnersuteldemoura/Desktop/aae-master/geo/") 
 data <- do.call("rbind", lapply(filenames, read.csv, header = TRUE, sep = ";")) 
 
 library(ggmap)
@@ -34,7 +32,7 @@ ggmap(mh_map_set_dois, extent='device') +geom_point(aes(x=V1, y=V2, colour = V4)
 ###############################
 ggmap(mh_map_set_dois, extent='device') +
   #geom_density2d(data=dados, aes(x=V1, y=V2), size=.1) +
-  stat_density2d(data=dados, aes(x=V1, y=V2,  fill = ..level.., alpha = ..level..), size = 0.2, bins = 16, geom = 'polygon')+
+  stat_density2d(data=dados, aes(x=V1, y=V2,  fill = ..level.., alpha = ..level..), size = 0.2, bins = 210, geom = 'polygon')+
   scale_fill_gradient(low = "yellow", high = "red") +
   scale_alpha(range = c(0, 0.3), guide = FALSE) + 
   ggtitle("EPTC Pontos Comerciais")
@@ -42,7 +40,7 @@ ggmap(mh_map_set_dois, extent='device') +
 
 ggmap(mh_map_set_dois) +
   stat_density2d(data = dados, aes(x = V1, y = V2, fill = ..level.., alpha = ..level..),
-                 geom = "polygon", size = 0.01, bins = 16) +
+                 geom = "polygon", size = 0.01, bins = 200) +
   scale_fill_gradient(low = "red", high = "green") +
   scale_alpha(range = c(0, 0.3), guide = FALSE)
 
@@ -50,7 +48,7 @@ ggmap(mh_map_set_dois) +
 
 ggmap(mh_map_set_dois) %+% dados +
   aes(x = V1, y = V2, z = (V1*V2)) +
-  stat_summary2d(fun = median, binwidth = c(.5, .5), alpha = 0.5) +
+  stat_summary2d(fun = median, binwidth = c(.3, .3), alpha = 0.5) +
   scale_fill_gradientn(name = "Median", colours = terrain.colors(10), space = "Lab") +
   labs(x = "Longitude", y = "Latitude") +
   coord_map()
@@ -77,7 +75,7 @@ library(gridExtra)
 dados$cut <- cut(dados$newrow, breaks=seq(0,1000,500), labels=sprintf("Score %d-%d",seq(0, 500, 500), seq(500,1000,500)))
 gg <- ggmap(mh_map_set_dois)
 gg <- gg + stat_density2d(data=dados, aes(x=V1, y=V2, colours= cut, fill=..level.., alpha=..level..),
-                          geom="polygon", size=0.01, bins=55)
+                          geom="polygon", size=0.01, bins=120)
 gg <- gg + scale_fill_viridis()
 gg <- gg + scale_alpha(range=c(0.2, 0.4), guide=FALSE)
 gg <- gg + coord_map()
@@ -94,7 +92,7 @@ gg
 
 #http://data-analytics.net/cep/Schedule_files/geospatial.html
 ggmap(mh_map_set_dois) + 
-  stat_density2d(aes(x = V1, y = V2, fill = ..level..,alpha=..level..), bins = 10, geom = "polygon", data = dados) +
+  stat_density2d(aes(x = V1, y = V2, fill = ..level..,alpha=..level..), bins = 100, geom = "polygon", data = dados) +
   scale_fill_gradient(low = "black", high = "red")+
   ggtitle("Map")
 
@@ -106,6 +104,7 @@ ggmap(mh_map_set_dois) +
 
 
 #https://datascienceplus.com/visualising-thefts-using-heatmaps-in-ggplot2/
+######**************************
 ggmap(mh_map_set_dois) + 
   geom_tile(data = dados, aes(x = V1, y = V2, alpha = newrow),fill = 'red') +
   theme(axis.title.y = element_blank(), axis.title.x = element_blank())
@@ -117,7 +116,7 @@ ggmap(mh_map_set_dois) +
 #https://datascienceplus.com/visualising-thefts-using-heatmaps-in-ggplot2/
 dados$newrow <- sample(100, size = nrow(dados), replace = TRUE)
 ggmap(mh_map_set_dois) + 
-  geom_point(data=dados, aes(x=V1, y=V2, color=newrow, size=0.1)) + 
+  geom_point(data=dados, aes(x=V1, y=V2, color=newrow, size=newrow)) + 
   scale_color_gradient(low='yellow', high='red')
 
 
@@ -189,11 +188,6 @@ pred.stat.map <- ggmap(mh_map_set_dois) %+% dados +
        y = "Latitude") +
   coord_map()
 print(pred.stat.map)
-ggsave(filename = "NYSubsamplePredStatMappng",
-       plot = pred.stat.map,
-       scale = 1,
-       width = 5, height = 3,
-       dpi = 300)
 
 
 
@@ -212,11 +206,7 @@ pred.stat.map <- ggmap(mh_map_set_dois) %+% dados +
        y = "Latitude") +
   coord_map()
 print(pred.stat.map)
-ggsave(filename = "NYSubsamplePredStatMappng2",
-       plot = pred.stat.map,
-       scale = 1,
-       width = 5, height = 3,
-       dpi = 300)
+
 
 
 
@@ -234,3 +224,20 @@ pred.stat.map <- ggmap(mh_map_set_dois) %+% dados +
        y = "Latitude") +
   coord_map()
 print(pred.stat.map)
+
+
+
+
+ggmap(mh_map_set_dois) + 
+    labs(x="longitude", y="latitude") + 
+    stat_density2d(data=dados, aes(x=V1, y=V2, alpha= ..level.., fill= ..level..), colour=FALSE,
+                   geom="polygon", bins=100) + 
+    scale_fill_gradientn(colours=c(rev(rainbow(100, start=0, end=.7)))) + scale_alpha(range=c(0,.8)) + 
+    guides(alpha=FALSE,fill=FALSE)
+
+library(leaflet.extras)
+data <- read.csv("DATA.csv", sep=";")
+data <- subset(data, !is.na(CrdLatDeg))
+leaflet(data) %>%
+    addTiles(group="OSM") %>%
+    addHeatmap(group="heat", lng=~data$CrdLonDeg, lat=~data$CrdLatDeg, max=.6, blur = 60)
