@@ -241,3 +241,21 @@ data <- subset(data, !is.na(CrdLatDeg))
 leaflet(data) %>%
     addTiles(group="OSM") %>%
     addHeatmap(group="heat", lng=~data$CrdLonDeg, lat=~data$CrdLatDeg, max=.6, blur = 60)
+
+
+ggmap(mh_map_set_dois) + 
+    geom_point(data = dados, aes(x = V1, y = V2, fill = dados$newrow, colour = "red"), 
+               alpha = 0.1, size = 1, shape = 16) + guides(fill=FALSE, alpha=FALSE, size=FALSE)
+
+
+
+library(leaflet.extras)
+data <- read.csv("DATA.csv", sep=";")
+data <- subset(data, !is.na(CrdLatDeg))
+leaflet(dados) %>%
+    addTiles(group="OSM") %>%
+        addHeatmap(group="heat", lng=~dados$V1, lat=~dados$V2, max=.5, blur = 60)
+
+leaflet(dados) %>%
+    addTiles(group="OSM") %>%
+    addHeatmap(group="heat", lng=dados$V1, lat=dados$V2, max=.5, blur = 60)
