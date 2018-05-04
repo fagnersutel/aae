@@ -1,9 +1,16 @@
-
+library(ggplot2)
+library(ggthemes)
+library(viridis) # devtools::install_github("sjmgarnier/viridis)
+library(ggmap)
+library(scales)
+library(grid)
+library(dplyr)
+library(gridExtra)
+library(leaflet.extras)
 setwd("/Users/fagnersuteldemoura/Desktop/aae-master/")
 filenames <- list.files(path = "/Users/fagnersuteldemoura/Desktop/aae-master/geo/") 
 data <- do.call("rbind", lapply(filenames, read.csv, header = TRUE, sep = ";")) 
 
-library(ggmap)
 mh_map_set_dois = get_googlemap(center = c(-51.200421939611394, -30.06753685571282), zoom = 12, source="osm")
 mapPoints <- ggmap(mh_map_set_dois)
 mapPoints
@@ -12,7 +19,11 @@ dados <- cbind(data$long, data$lat, data$default, data$tipo)
 dados <- as.data.frame(dados)
 dados$V1 <- as.numeric(as.character(dados$V1))
 dados$V2 <- as.numeric(as.character(dados$V2))
+dados <- dados[dados$V2 < 0, ]
+dados <- subset(dados, !is.na(V1))
 dim(dados)
+dim(dados)
+
 dados$newrow <- sample(1000, size = nrow(dados), replace = TRUE)
 
 mapPoints <- ggmap(mh_map_set_dois) + 
@@ -32,7 +43,7 @@ ggmap(mh_map_set_dois, extent='device') +geom_point(aes(x=V1, y=V2, colour = V4)
 ###############################
 ggmap(mh_map_set_dois, extent='device') +
   #geom_density2d(data=dados, aes(x=V1, y=V2), size=.1) +
-  stat_density2d(data=dados, aes(x=V1, y=V2,  fill = ..level.., alpha = ..level..), size = 0.2, bins = 210, geom = 'polygon')+
+  stat_density2d(data=dados, aes(x=V1, y=V2,  fill = ..level.., alpha = ..level..), size = 0.2, bins = 250, geom = 'polygon')+
   scale_fill_gradient(low = "yellow", high = "red") +
   scale_alpha(range = c(0, 0.3), guide = FALSE) + 
   ggtitle("EPTC Pontos Comerciais")
@@ -41,7 +52,7 @@ ggmap(mh_map_set_dois, extent='device') +
 ggmap(mh_map_set_dois) +
   stat_density2d(data = dados, aes(x = V1, y = V2, fill = ..level.., alpha = ..level..),
                  geom = "polygon", size = 0.01, bins = 200) +
-  scale_fill_gradient(low = "red", high = "green") +
+  scale_fill_gradient(low = "blue", high = "red") +
   scale_alpha(range = c(0, 0.3), guide = FALSE)
 
 
@@ -52,22 +63,6 @@ ggmap(mh_map_set_dois) %+% dados +
   scale_fill_gradientn(name = "Median", colours = terrain.colors(10), space = "Lab") +
   labs(x = "Longitude", y = "Latitude") +
   coord_map()
-
-
-
-
-
-library(ggplot2)
-library(ggthemes)
-library(viridis) # devtools::install_github("sjmgarnier/viridis)
-library(ggmap)
-library(scales)
-library(grid)
-library(dplyr)
-library(gridExtra)
-
-
-
 
 
 #https://stackoverflow.com/questions/32148564/heatmap-plot-by-value-using-ggmap
@@ -125,7 +120,7 @@ ggmap(mh_map_set_dois) +
 
 #https://datascienceplus.com/visualising-thefts-using-heatmaps-in-ggplot2/
 ggmap(mh_map_set_dois) + 
-  geom_tile(data = dados, aes(x = V1, y = V2, alpha = newrow),fill = 'red') +
+  geom_tile(data = dados, aes(x = V1, y = V2, alpha = newrow, ),fill = 'red') +
   theme(axis.title.y = element_blank(), axis.title.x = element_blank())
 
 
@@ -249,13 +244,57 @@ ggmap(mh_map_set_dois) +
 
 
 
-library(leaflet.extras)
+
 data <- read.csv("DATA.csv", sep=";")
 data <- subset(data, !is.na(CrdLatDeg))
 leaflet(dados) %>%
     addTiles(group="OSM") %>%
-        addHeatmap(group="heat", lng=~dados$V1, lat=~dados$V2, max=.5, blur = 60)
+        addHeatmap(group="heat", lng=~V1, lat=~V2, max=.5, blur = 60)
+
 
 leaflet(dados) %>%
     addTiles(group="OSM") %>%
-    addHeatmap(group="heat", lng=dados$V1, lat=dados$V2, max=.5, blur = 60)
+    addHeatmap(group="heat", lng=dados$V1, lat=dados$V2, max=.5, blur = 60) %>% 
+    addCircles(~V1, ~V2, popup=dados$newrow,  weight = 0.1, radius=1, color="red", stroke = TRUE, fillOpacity = 0.8) %>% 
+    addLegend("bottomright", colors= "#ffa500", labels="Dunkin", title="In Connecticut")
+    #%>%
+    #addMarkers(~V1, ~V2, popup = ~as.character(newrow), label = ~as.character(newrow))
+
+
+
+
+leaflet(dados) %>%
+    addTiles(group="OSM") %>%
+    addCircles(~V1, ~V2, popup=~newrow,  weight = 0.1, radius=4, color="#ffa500", stroke = TRUE, fillOpacity = 0.8) %>% 
+    addLegend("bottomright", colors= "#ffa500", labels="Com??rcio e Servi??os", title="Alvaras de:")
+
+
+dados <- dados[1:100,]
+
+leaflet(dados) %>% addTiles() %>%
+    addMarkers(~V1, ~V2, popup =dados$newrow, label =~newrow)
+
+
+
+leaflet(dados) %>% addTiles() %>%
+    addCircles(~V1, ~V2, popup=~newrow,  weight = 0.1, radius=40, color="#ffa500", stroke = TRUE, fillOpacity = 0.8)
+
+
+
+#https://stackoverflow.com/questions/32275213/how-do-i-connect-two-coordinates-with-a-line-using-leaflet-in-r
+mydf <- data.frame(Observation = c("A", "B","C","D","E"),
+                   InitialLat = c(62.469722,48.0975,36.84,50.834194,50.834194),
+                   InitialLong = c(6.187194, 16.3108,-2.435278,4.298361,4.298361),
+                   NewLat = c(51.4749, 51.4882,50.861822,54.9756,54.9756),
+                   NewLong = c(-0.221619, -0.302621,-0.083278,-1.62179,-1.62179),
+                   stringsAsFactors = FALSE)
+
+mydf
+map3 = leaflet(mydf) %>% addTiles()
+map3 %>% addMarkers(~InitialLong,~InitialLat, popup=~Observation)
+
+
+
+
+map3 = leaflet(dados) %>% addTiles()
+map3 %>% addMarkers(~V1,~V2, popup=~newrow)
