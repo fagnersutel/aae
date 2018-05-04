@@ -77,7 +77,8 @@ ggmap(ny, extent='device', legend='topleft')+
 
 ggmap(get_map(location = c(lon = Cam[which.max(Cam$count), 'lon'], 
                            lat = Cam[which.max(Cam$count), 'lat']), zoom=15), legend='topleft')+ 
-  geom_point(aes(x=lon, y=lat, size=count), color='red', data=Cam)+ scale_size_continuous(range=c(2,8))+
+  geom_point(aes(x=lon, y=lat, size=count), color='red', data=Cam)+ 
+  scale_size_continuous(range=c(2,8))+
   geom_point(aes(x=lon, y =lat), size = 3, data = School.Loc)+ 
   theme(axis.text.x=element_blank(), axis.text.y=element_blank(), 
         axis.title.x=element_blank(),axis.title.y=element_blank(), axis.ticks=element_blank())+

@@ -106,14 +106,16 @@ ggmap(mh_map_set_dois) +
   scale_alpha(range = c(0, 0.3), guide = FALSE) + 
   ggtitle("EPTC Pontos Comerciais")
 
-
+##
+#https://nycdatascience.com/blog/student-works/nyc-speed-camera-program-revenue-or-safety-well-get-you-up-to-speed-in-a-flash/
 ggmap(mh_map_set_dois) +
   #geom_density2d(data=dados, aes(x=V1, y=V2), size=.1) +
-  stat_density2d(data=dados, aes(x=V1, y=V2,  fill = ..level.., alpha = ..level..), size = 0.2, bins = 250, geom = 'polygon')+
+  stat_density2d(data=dados, aes(x=V1, y=V2,  fill = ..level.., alpha = ..level..), 
+    bins = 250, geom = 'polygon')+
   scale_fill_gradient(low = "yellow", high = "red") +
   scale_alpha(range = c(0, 0.3), guide = FALSE) + 
-  geom_point(aes(x=V1, y=V2, size=(V4/10)), color='blue', data=dados[1:10,]) + 
-  scale_size_continuous(range=c(1,6))+
+  geom_point(aes(x=V1, y=V2, size=(V4/100)), color='green', data=dados[1:10,]) + 
+  scale_size_continuous(range=c(1,3))+
   ggtitle("EPTC Pontos Comerciais")
 
 #Densidade blue/red
