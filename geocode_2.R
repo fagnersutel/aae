@@ -23,7 +23,7 @@ origAddress$addresses <- as.character(origAddress$geoAddress)
 head(origAddress)
 dim(origAddress)
 #definimoso range da pesquisa
-origAddress<- origAddress[35001:40000,]
+origAddress<- origAddress[60001:67584,]
 #fazemos a restricao
 addresses <- origAddress$addresses
 #verificamos o tamanho

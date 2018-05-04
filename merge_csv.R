@@ -7,11 +7,14 @@ library(grid)
 library(dplyr)
 library(gridExtra)
 library(leaflet.extras)
-setwd("/Users/fagnersuteldemoura/Desktop/aae-master/")
-filenames <- list.files(path = "/Users/fagnersuteldemoura/Desktop/aae-master/geo/") 
+setwd("/Users/fsmoura/Desktop/docs/")
+filenames <- list.files(path = "/Users/fsmoura/Desktop/docs/geo/") 
 data <- do.call("rbind", lapply(filenames, read.csv, header = TRUE, sep = ";")) 
 
-mh_map_set_dois = get_googlemap(center = c(-51.200421939611394, -30.06753685571282), zoom = 12, source="osm")
+mh_map_set_dois = get_googlemap(center = c(-51.200421939611394, -30.06753685571282), zoom = 12, source="osm",
+color = "color",
+source = "google",
+maptype = "roadmap")
 mapPoints <- ggmap(mh_map_set_dois)
 mapPoints
 names(data)
@@ -22,26 +25,81 @@ dados$V2 <- as.numeric(as.character(dados$V2))
 dados <- dados[dados$V2 < 0, ]
 dados <- subset(dados, !is.na(V1))
 dim(dados)
-dim(dados)
-
 dados$newrow <- sample(1000, size = nrow(dados), replace = TRUE)
+dados$cut <- cut(dados$newrow, breaks=seq(0,1000,200), labels=sprintf("Score %d-%d",seq(0, 800, 200), seq(200,1000,200)))
 
+##Mapa de pontos
 mapPoints <- ggmap(mh_map_set_dois) + 
   geom_point(data = dados, aes(x = V1, y = V2), 
              fill = "red", alpha =0.2, size = 0.5, shape = 21,stroke = 0) + 
-  ggtitle("EPTC Pontos de Atratividade")
+  scale_fill_gradient(low = "yellow", high = "red") + 
+  ggtitle("EPTC - Alvarás 2017")
 mapPoints
 
-#########################
-library(ggplot2)
-ggmap(mh_map_set_dois, extent='device') +geom_point(aes(x=V1, y=V2), colour="red", alpha=0.1, size=1, data=dados)
 
-library(ggplot2)
-ggmap(mh_map_set_dois, extent='device') +geom_point(aes(x=V1, y=V2, colour = V4), alpha=0.1, size=1, data=dados)
+#Mapa de densidade amarelo / vermelho + linhas
+ggmap(mh_map_set_dois) +
+  geom_density2d(data=dados,aes(x=V1,y=V2), bins=20) +
+  stat_density2d(data=dados,aes(x=V1,y=V2,fill=..level.., alpha=..level..), geom='polygon')+ 
+  scale_fill_gradient(low = "yellow", high = "red") + 
+  labs(x = "Longitude", y = "Latitude") + ggtitle("Densidade de Alvarás 2017 - EPTC")
+
+
+
+##Mapa de densidade verde/vermelho
+ggmap(mh_map_set_dois, extent = "device") + 
+  geom_density_2d(data = dados,aes(x = V1, y = V1), 
+                 size = 0.3) + 
+  stat_density_2d(data = dados, 
+                 aes(x = V1, y = V2, fill = ..level.., alpha = ..level..), size = 0.01, 
+                bins = 200, geom = "polygon") + 
+  scale_fill_gradient(low = "green", high = "red") + 
+  scale_alpha(range = c(0, 0.3), guide = FALSE) 
+
+
+## scale_colour_hue
+ggmap(mh_map_set_dois) + 
+  geom_point(data = dados, aes(x = V1, y = V2, colour = cut), alpha = 0.2) + 
+  scale_colour_hue(h = c(180, 270)) +
+  ggtitle("...") +
+  xlab("...") + ylab("...") 
+
+## Classe por Cor
+#https://stablemarkets.wordpress.com/2015/03/07/vehicle-accident-density-in-nyc/
+col_vals=c('Score 0-200'='dodgerblue', 'Score 200-400'='darkred',
+           'Score 400-600'='violet','Score 600-800'='darkgreen',
+           'Score 800-1000'='darkgoldenrod4')
+ggmap(mh_map_set_dois) +
+  stat_density2d(data=dados, geom='polygon',bins = 10, aes(x=V1,y=V2,fill = cut, alpha=..level..))+
+  scale_fill_manual(values=col_vals)+
+  #guides(fill = guide_colorbar(barwidth = 1, barheight = 12)) +
+  scale_alpha(guide = FALSE)+ 
+  xlab(' ')+ylab(' ')+
+  ggtitle('Classe por cor')
+
+ggmap(mh_map_set_dois) +
+  stat_density2d(data= dados, aes(x = V1, y = V2, alpha=.75,fill=..level..),bins = 10, geom = 'polygon')+
+  guides(fill = guide_colorbar(barwidth = 1, barheight = 12)) +
+  scale_alpha(guide = FALSE)+ 
+  xlab(' ')+ylab(' ')+
+  ggtitle('Densidade de Alvarás')
+
+
+
+
+#########################
+##Mapa de Pontos Red
+ggmap(mh_map_set_dois, extent='device') +
+  geom_point(aes(x=V1, y=V2), colour="red", alpha=0.1, size=0.1, data=dados)
+
+
+ggmap(mh_map_set_dois, extent='device') +
+  geom_point(aes(x=V1, y=V2, colour = V4), alpha=0.1, size=1, data=dados)
 
 
 ###############################
-ggmap(mh_map_set_dois, extent='device') +
+#Densidade red/yellow
+ggmap(mh_map_set_dois) +
   #geom_density2d(data=dados, aes(x=V1, y=V2), size=.1) +
   stat_density2d(data=dados, aes(x=V1, y=V2,  fill = ..level.., alpha = ..level..), size = 0.2, bins = 250, geom = 'polygon')+
   scale_fill_gradient(low = "yellow", high = "red") +
@@ -50,34 +108,144 @@ ggmap(mh_map_set_dois, extent='device') +
 
 
 ggmap(mh_map_set_dois) +
+  #geom_density2d(data=dados, aes(x=V1, y=V2), size=.1) +
+  stat_density2d(data=dados, aes(x=V1, y=V2,  fill = ..level.., alpha = ..level..), size = 0.2, bins = 250, geom = 'polygon')+
+  scale_fill_gradient(low = "yellow", high = "red") +
+  scale_alpha(range = c(0, 0.3), guide = FALSE) + 
+  geom_point(aes(x=V1, y=V2, size=(V4/10)), color='blue', data=dados[1:10,]) + 
+  scale_size_continuous(range=c(1,6))+
+  ggtitle("EPTC Pontos Comerciais")
+
+#Densidade blue/red
+ggmap(mh_map_set_dois) +
   stat_density2d(data = dados, aes(x = V1, y = V2, fill = ..level.., alpha = ..level..),
                  geom = "polygon", size = 0.01, bins = 200) +
   scale_fill_gradient(low = "blue", high = "red") +
   scale_alpha(range = c(0, 0.3), guide = FALSE)
 
 
-
 ggmap(mh_map_set_dois) %+% dados +
-  aes(x = V1, y = V2, z = (V1*V2)) +
-  stat_summary2d(fun = median, binwidth = c(.3, .3), alpha = 0.5) +
+  aes(x = V1, y = V2, z = newrow) +
+  stat_summary_2d(fun = median, binwidth = c(.3, .3), alpha = 0.5) +
   scale_fill_gradientn(name = "Median", colours = terrain.colors(10), space = "Lab") +
   labs(x = "Longitude", y = "Latitude") +
   coord_map()
+  
+
+
+
+## LM
+ggmap(mh_map_set_dois) + 
+  stat_density2d(data = dados, aes(x = V1, y = V2, fill = ..level.., alpha = ..level..),
+                                        geom = "polygon", size = 0.01, bins = 200) +
+  scale_fill_continuous(low="green",high="red") +
+  geom_smooth(method=lm,linetype=2,colour="red",se=F) + 
+  guides(alpha="none") +
+  geom_point()
+
+
+
+##
+ggmap(mh_map_set_dois, extent='device', legend='topleft')+
+  geom_point(aes(x=V1, y=V2, size=V4), color='red', data=dados[1:10,]) + 
+  scale_size_continuous(range=c(2,8))+
+  theme(axis.text.x=element_blank(), axis.text.y=element_blank(), 
+        axis.title.x=element_blank(),axis.title.y=element_blank()) +
+  stat_density2d(aes(x=V1, y=V2, fill = ..level.., alpha=..level..), 
+                 size = 5, bins=120, geom='polygon', data=dados) +
+  scale_alpha(range = c(0,0.35), guide=FALSE) + 
+  scale_fill_gradient(limits = c(200,10000), low='yellow', high='orange') +
+  labs(title = 'Densidade', size='Indice', fill = 'fill')
+
 
 
 #https://stackoverflow.com/questions/32148564/heatmap-plot-by-value-using-ggmap
 
-dados$cut <- cut(dados$newrow, breaks=seq(0,1000,500), labels=sprintf("Score %d-%d",seq(0, 500, 500), seq(500,1000,500)))
+
 gg <- ggmap(mh_map_set_dois)
 gg <- gg + stat_density2d(data=dados, aes(x=V1, y=V2, colours= cut, fill=..level.., alpha=..level..),
                           geom="polygon", size=0.01, bins=120)
 gg <- gg + scale_fill_viridis()
 gg <- gg + scale_alpha(range=c(0.2, 0.4), guide=FALSE)
 gg <- gg + coord_map()
-gg <- gg + facet_wrap(~cut, ncol=3)
+gg <- gg + facet_wrap(~cut, ncol=2)
 gg <- gg + labs(x=NULL, y=NULL, title="Score Distribution Across All Schools\n")
 gg <- gg + theme_map(base_family="Helvetica")
 gg <- gg + theme(plot.title=element_text(face="bold", hjust=1))
+gg <- gg + theme(panel.margin.x=unit(1, "cm"))
+gg <- gg + theme(panel.margin.y=unit(1, "cm"))
+gg <- gg + theme(legend.position="right")
+gg <- gg + theme(strip.background=element_rect(fill="white", color="white"))
+gg <- gg + theme(strip.text=element_text(face="bold", hjust=0))
+gg
+
+
+dados$cut <- cut(dados$newrow, breaks=seq(0,1000,500), labels=sprintf("Score %d-%d",seq(0, 500, 500), seq(500,1000,500)))
+gg <- ggmap(mh_map_set_dois)
+gg <- gg + stat_density2d(data=dados[1:20000], aes(x=V1, y=V2,  fill=..level.., alpha=..level..),
+                          geom="polygon", size=0.01, bins=120)
+gg <- gg + scale_fill_viridis()
+gg <- gg + scale_alpha(range=c(0.2, 0.4), guide=FALSE)
+gg <- gg + coord_map()
+#gg <- gg + facet_wrap(~cut, ncol=3)
+gg <- gg + scale_fill_gradient(low = "green", high = "red")
+gg <- gg + labs(x=NULL, y=NULL, title="Score Distribution Across All Schools\n")
+gg <- gg + theme_map(base_family="Helvetica")
+gg <- gg + theme(plot.title=element_text(face="bold", hjust=1))
+gg <- gg + theme(panel.margin.x=unit(1, "cm"))
+gg <- gg + theme(panel.margin.y=unit(1, "cm"))
+gg <- gg + theme(legend.position="right")
+gg <- gg + theme(strip.background=element_rect(fill="white", color="white"))
+gg <- gg + theme(strip.text=element_text(face="bold", hjust=0))
+gg
+
+
+
+library(RColorBrewer)
+YlOrBr <- c("#FFFFD4", "#FED98E", "#FE9929", "#D95F0E", "#993404")
+ggmap(mh_map_set_dois) +
+  stat_density2d(data = dados[1:50000,], aes(x = V1, y = V2, fill = ..level.., alpha = ..level..),
+                 geom = "polygon", size = 0.01, bins = 160) +
+  scale_fill_gradient(low = "yellow", high = "red") +
+  scale_alpha(range = c(0, 0.3), guide = FALSE) 
+
+
+
+ggmap(mh_map_set_dois) +
+  stat_density2d(data = dados[1:50000,], aes(x = V1, y = V2, fill = ..level.., alpha = ..level..),
+                 geom = "polygon", size = 0.01, bins = 160) +
+  scale_fill_gradientn(name = "Median", colours = YlOrBr, space = "Lab") +
+  scale_alpha(range = c(0, 0.3), guide = FALSE)
+
+
+
+
+gg <- ggmap(mh_map_set_dois)
+gg <- gg + stat_density2d(data=dados[1:40000,], aes(x=V1, y=V2, 
+                                                    fill=..level.., alpha=..level..),
+                          geom="polygon", size=0.01, bins=140)
+gg <- gg + scale_fill_viridis()
+gg <- gg + scale_alpha(range=c(0.2, 0.4), guide=FALSE)
+gg <- gg + scale_fill_gradient(low = "green", high = "red")
+gg <- gg + scale_colour_gradient(low = "white", high = "green")
+gg <- gg + coord_map()
+#gg <- gg + facet_wrap(~cut, ncol=3)
+gg <- gg + labs(x=NULL, y=NULL, title="Titulo\n")
+gg <- gg + theme(panel.margin.x=unit(1, "cm"))
+gg <- gg + theme(panel.margin.y=unit(1, "cm"))
+gg <- gg + theme(legend.position="right")
+gg <- gg + theme(strip.background=element_rect(fill="white", color="white"))
+gg <- gg + theme(strip.text=element_text(face="bold", hjust=0))
+gg
+
+
+#scale_fill_gradientn(colours=c(rev(rainbow(100, start=0, end=.7))))
+gg <- gg + scale_fill_viridis()
+gg <- gg + scale_alpha(range=c(0.2, 0.4), guide=FALSE)
+gg <- gg + scale_fill_gradientn(colours=c(rev(rainbow(100, start=0, end=.7))))
+gg <- gg + coord_map()
+#gg <- gg + facet_wrap(~cut, ncol=3)
+gg <- gg + labs(x=NULL, y=NULL, title="Titulo\n")
 gg <- gg + theme(panel.margin.x=unit(1, "cm"))
 gg <- gg + theme(panel.margin.y=unit(1, "cm"))
 gg <- gg + theme(legend.position="right")
@@ -93,7 +261,7 @@ ggmap(mh_map_set_dois) +
 
 
 ggmap(mh_map_set_dois) + 
-  stat_density2d(aes(x = V1, y = V2,  fill = ..level..,alpha=..level..), bins = 100, geom = "polygon", data = dados) +
+  stat_density2d(aes(x = V1, y = V2,  fill = ..level..,alpha=..level..), bins = 200, geom = "polygon", data = dados) +
   scale_fill_gradient(low = "black", high = "red")+
   ggtitle("Map")
 
@@ -144,7 +312,7 @@ HoustonMap +
   stat_density2d(
     aes(x = V1, y = V2, fill = ..level..,
         alpha = ..level..),
-    size = 2, bins = 60, data = dados,
+    size = 2, bins = 600, data = dados,
     geom = "polygon")
 
 
@@ -153,11 +321,10 @@ HoustonMap +
 ggmap(mh_map_set_dois) + 
   geom_point(data=dados,aes(x = V1, y = V2,  z = newrow, fill = V1*V2)) + 
   geom_tile() + 
-  #coord_equal() +
-#  geom_contour(color = "white", alpha = 0.5) +
-  #geom_point(data = , mapping = aes(Longitude, Latitude),shape=1, inherit.aes = FALSE)+
+  coord_equal() +
+  geom_point(data = dados, mapping = aes(V1, V2),shape=1, inherit.aes = FALSE)+
   scale_fill_distiller(palette="Spectral", na.value="white",limits=c(0,0.4)) + 
-  #scale_x_reverse()+
+  scale_x_reverse()+
   theme_bw()+
   ggtitle("Chlorophyll-a distribution")+
   ylab("Latitude S") + xlab("Longitude E")+
@@ -222,13 +389,16 @@ print(pred.stat.map)
 
 
 
-
+dados2 <- dados[1:50000,]
 ggmap(mh_map_set_dois) + 
     labs(x="longitude", y="latitude") + 
-    stat_density2d(data=dados, aes(x=V1, y=V2, alpha= ..level.., fill= ..level..), colour=FALSE,
-                   geom="polygon", bins=100) + 
-    scale_fill_gradientn(colours=c(rev(rainbow(100, start=0, end=.7)))) + scale_alpha(range=c(0,.8)) + 
+    stat_density_2d(data=dados2, aes(x=V1, y=V2, alpha= ..level.., fill= ..level..), colour=FALSE,
+                   geom="polygon", bins=150) + 
+    scale_fill_gradientn(colours=c(rev(rainbow(100, start=0, end=.7)))) + 
+    scale_alpha(range=c(0,.8)) + 
     guides(alpha=FALSE,fill=FALSE)
+
+
 
 library(leaflet.extras)
 data <- read.csv("DATA.csv", sep=";")
@@ -240,7 +410,8 @@ leaflet(data) %>%
 
 ggmap(mh_map_set_dois) + 
     geom_point(data = dados, aes(x = V1, y = V2, fill = dados$newrow, colour = "red"), 
-               alpha = 0.1, size = 1, shape = 16) + guides(fill=FALSE, alpha=FALSE, size=FALSE)
+               alpha = 0.1, size = 1, shape = 16) + 
+               guides(fill=FALSE, alpha=FALSE, size=FALSE)
 
 
 
@@ -269,9 +440,9 @@ leaflet(dados) %>%
     addLegend("bottomright", colors= "#ffa500", labels="Com??rcio e Servi??os", title="Alvaras de:")
 
 
-dados <- dados[1:100,]
+dados3 <- dados[1:100,]
 
-leaflet(dados) %>% addTiles() %>%
+leaflet(dados3) %>% addTiles() %>%
     addMarkers(~V1, ~V2, popup =dados$newrow, label =~newrow)
 
 
@@ -298,3 +469,24 @@ map3 %>% addMarkers(~InitialLong,~InitialLat, popup=~Observation)
 
 map3 = leaflet(dados) %>% addTiles()
 map3 %>% addMarkers(~V1,~V2, popup=~newrow)
+
+
+
+
+library(ggplot2)
+library(ggmap)
+library(RColorBrewer)
+drone.map <- ggmap(mh_map_set_dois, extent="device", legend="none")
+drone.map <- drone.map + stat_density2d(data=dados,
+  aes(x=V1, y=V2, fill=..level.., alpha=..level..), geom="polygon")
+## Define the spectral colors to fill the density contours
+drone.map <- drone.map + scale_fill_gradientn(colours=rev(brewer.pal(7, "Spectral")))
+drone.map <- drone.map + geom_point(data=dados,
+                                    aes(x=V1, y=V2), size=0.1, fill="red", shape=21, alpha=0.8)
+## Remove any legends
+drone.map <- drone.map + guides(size=FALSE, alpha = FALSE)
+## Give the map a title
+drone.map <- drone.map + ggtitle("US Drone Strikes in Pakistan from 2008 to 2013")
+drone.map
+
+
