@@ -492,3 +492,55 @@ drone.map <- drone.map + ggtitle("US Drone Strikes in Pakistan from 2008 to 2013
 drone.map
 
 
+
+
+
+library(apcluster)
+cl1 <- cbind(rnorm(30, 0.3, 0.05), rnorm(30, 0.7, 0.04))
+cl2 <- cbind(rnorm(30, 0.7, 0.04), rnorm(30, 0.4, .05))
+x1 <- rbind(cl1, cl2)
+x1
+plot(x1, xlab="", ylab="", pch=19, cex=0.8)
+apres1a <- apcluster(negDistMat(r=2), x1)
+s1 <- negDistMat(x1, r=2)
+apres1b <- apcluster(s1)
+apres1a
+plot(apres1a, x1)
+heatmap(apres1a)
+heatmap(apres1b, s1)
+apres1c <- apcluster(s1, details=TRUE)
+plot(apres1c)
+cl3 <- cbind(rnorm(20, 0.50, 0.03), rnorm(20, 0.72, 0.03))
+cl4 <- cbind(rnorm(25, 0.50, 0.03), rnorm(25, 0.42, 0.04))
+#x2 <- rbind(x1, cl3, cl4)
+x2 <- rbind(x1, cl3, cl4)
+x2
+plot(x2, xlab="", ylab="", pch=19, cex=0.)
+apres2a <- apcluster(negDistMat(r=2), x2)
+plot(apres2a, x2)
+apres2b <- apcluster(negDistMat(r=2), x2, q=0)
+plot(apres2b, x2)
+apres2c <- apcluster(negDistMat(r=2), x2, q=0.8)
+plot(apres2c, x2)
+apres2c@p     
+heatmap(apres2c)     
+
+
+
+
+x2 <- cbind(dados$V1, dados$V2)
+head(x2)
+x2 <- x2[1:3000,]
+plot(x2, xlab="", ylab="", pch=19, cex=0.2)
+apres2a <- apcluster(negDistMat(r=2), x2)
+plot(apres2a, x2)
+heatmap(apres2a)
+apres2b <- apcluster(negDistMat(r=2), x2, q=0)
+plot(apres2b, x2)
+apres2c <- apcluster(negDistMat(r=2), x2, q=0.8)
+plot(apres2c, x2)
+apres2c@p     
+heatmap(apres2c)  
+
+save(apres1a, file = "mydata.rda")
+load(file = "mydata.rda")
