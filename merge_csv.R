@@ -529,8 +529,10 @@ heatmap(apres2c)
 
 
 x2 <- cbind(dados$V1, dados$V2)
+x2 <- x2[complete.cases(x2), ]
 head(x2)
-x2 <- x2[1:3000,]
+
+x2 <- x2[sample(nrow(x2), 2500), ]
 plot(x2, xlab="", ylab="", pch=19, cex=0.2)
 apres2a <- apcluster(negDistMat(r=2), x2)
 plot(apres2a, x2)
