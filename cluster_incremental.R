@@ -37,14 +37,6 @@ dat[["train"]][ind] <- FALSE
 
 cl1 = kcca(dat[dat[["train"]]==TRUE, 1:2], k=51, kccaFamily("kmeans"))
 cl1    
-#
-# call:
-# kcca(x = dat[dat[["train"]] == TRUE, 1:2], k = 4)
-#
-# cluster sizes:
-#
-#  1   2   3   4 
-#130 181  98  91 
 
 pred_train <- predict(cl1)
 pred_test <- predict(cl1, newdata=dat[dat[["train"]]==FALSE, 1:2])
@@ -53,6 +45,3 @@ image(cl1)
 points(dat[dat[["train"]]==TRUE, 1:2], col=pred_train, pch='.', cex=0.3)
 #points(dat[dat[["train"]]==FALSE, 1:2], col=pred_test, pch=22, bg="orange")
 points(dat[dat[["train"]]==FALSE, 1:2], col=pred_test, pch='*', bg="orange", cex=0.1)
-as.kcca(cl1, data=x)
-
-table(predict(pred_test), pred_train)
