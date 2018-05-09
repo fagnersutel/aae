@@ -29,3 +29,25 @@ HC5K = hclust(DM5K, method="single")
 Groups = cutree(HC5K, 8)
 Groups[Groups>4] = 4
 plot(XY[Sample5K,], pch=20, col=rainbow(4, alpha=c(0.2,0.2,0.2,1))[Groups])
+
+
+
+#
+dados$V3 = NULL
+dados$V4 = NULL
+head(dados)
+x = dados$V1
+y = dados$V2
+XY = data.frame(x,y)
+dim(XY)
+Sample5K = sample(length(x), 5000)     ## Downsample
+
+## Cluster the sample
+DM5K = dist(XY[Sample5K,])
+HC5K = hclust(DM5K, method="single")
+View(HC5K)
+Groups = cutree(HC5K, 51)
+#Groups[Groups>4] = 4
+plot(XY[Sample5K,], pch=20, col=rainbow(51, alpha=c(0.2,0.2,0.2,1))[Groups])
+teste = XY[Sample5K,]
+head(teste, 50)
