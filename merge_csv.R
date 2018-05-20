@@ -1,16 +1,20 @@
 library(ggplot2)
 library(ggthemes)
-library(viridis) # devtools::install_github("sjmgarnier/viridis)
+#devtools::install_github("sjmgarnier/viridis")
+library(viridis) 
 library(ggmap)
 library(scales)
 library(grid)
 library(dplyr)
 library(gridExtra)
 library(leaflet.extras)
-setwd("/Users/fsmoura/Desktop/docs/")
-filenames <- list.files(path = "/Users/fsmoura/Desktop/docs/geo/") 
+library(apcluster)
+setwd("/Users/fagnersuteldemoura/r-files/aae/")
+filenames <- list.files(path = "/Users/fagnersuteldemoura/r-files/aae/geo/") 
+filenames
+setwd("/Users/fagnersuteldemoura/r-files/aae/geo/") 
 data <- do.call("rbind", lapply(filenames, read.csv, header = TRUE, sep = ";")) 
-
+head(data)
 mh_map_set_dois = get_googlemap(center = c(-51.200421939611394, -30.06753685571282), zoom = 12, source="osm",
 color = "color",
 source = "google",
@@ -33,7 +37,7 @@ mapPoints <- ggmap(mh_map_set_dois) +
   geom_point(data = dados, aes(x = V1, y = V2), 
              fill = "red", alpha =0.2, size = 0.5, shape = 21,stroke = 0) + 
   scale_fill_gradient(low = "yellow", high = "red") + 
-  ggtitle("EPTC - Alvarás 2017")
+  ggtitle("EPTC - Alvar?s 2017")
 mapPoints
 
 
@@ -42,7 +46,7 @@ ggmap(mh_map_set_dois) +
   geom_density2d(data=dados,aes(x=V1,y=V2), bins=20) +
   stat_density2d(data=dados,aes(x=V1,y=V2,fill=..level.., alpha=..level..), geom='polygon')+ 
   scale_fill_gradient(low = "yellow", high = "red") + 
-  labs(x = "Longitude", y = "Latitude") + ggtitle("Densidade de Alvarás 2017 - EPTC")
+  labs(x = "Longitude", y = "Latitude") + ggtitle("Densidade de Alvar?s 2017 - EPTC")
 
 
 
@@ -82,7 +86,7 @@ ggmap(mh_map_set_dois) +
   guides(fill = guide_colorbar(barwidth = 1, barheight = 12)) +
   scale_alpha(guide = FALSE)+ 
   xlab(' ')+ylab(' ')+
-  ggtitle('Densidade de Alvarás')
+  ggtitle('Densidade de Alvar?s')
 
 
 
@@ -531,8 +535,11 @@ heatmap(apres2c)
 x2 <- cbind(dados$V1, dados$V2)
 x2 <- x2[complete.cases(x2), ]
 head(x2)
-
+#x1 <- x2[1:5000,]
+x1 <- x2
 x2 <- x2[sample(nrow(x2), 2500), ]
+dim(x1)
+dim(x2)
 plot(x2, xlab="", ylab="", pch=19, cex=0.2)
 apres2a <- apcluster(negDistMat(r=2), x2)
 plot(apres2a, x2)
@@ -543,6 +550,63 @@ apres2c <- apcluster(negDistMat(r=2), x2, q=0.8)
 plot(apres2c, x2)
 apres2c@p     
 heatmap(apres2c)  
-
-save(apres1a, file = "mydata.rda")
+setwd("/Users/fagnersuteldemoura/r-files/aae/")
+save(apres2a, file = "mydata.rda")
 load(file = "mydata.rda")
+plot(apres2a, x2)
+     
+
+
+
+
+#apres <- apcluster(negDistMat(r=2), x2, q=0)
+apres <- apcluster(negDistMat(r=2), x2)
+
+## auxiliary predict() function
+predict.apcluster <- function(s, exemplars, newdata)
+{
+  simMat <- s(rbind(exemplars, newdata), sel=(1:nrow(newdata)) + nrow(exemplars))[1:nrow(exemplars), ]
+  unname(apply(simMat, 2, which.max))
+}
+resul <- predict.apcluster(negDistMat(r=2), x2[apres@exemplars, ], x1[1:1000,])
+length(resul)
+head(resul)
+teste <- as.data.frame(resul)
+dim(teste)
+final <- cbind(x1, teste)
+head(final,25)
+dim(x1)
+x3 <- x1[1:5000,]
+x3 <- as.data.frame(x3)
+dim(x3)
+
+resultado <- list()
+for (posicao in x3){
+  resultado = predict.apcluster(negDistMat(r=2), x2[apres@exemplars, ], x3[posicao,])
+}
+
+
+
+#Standart normal have variance 1; means of n standart normal have standart deviation 1/sqrt(n)
+nosim = 1000
+n = 10
+matriz =matrix(rnorm(nosim * n), nosim)
+dim(matriz)
+head(matriz)
+media = apply(matriz, 1, mean)
+media
+length(media)
+sd(media)
+1/sqrt(10)
+
+#Standart uniforms have bariance 1/12; means of randon samples of n uniforms have sd 1/sqrt(12 * n)
+nosim = 1000
+n = 10
+matriz =matrix(runif(nosim * n), nosim)
+dim(matriz)
+head(matriz)
+media = apply(matriz, 1, mean)
+media
+length(media)
+sd(media)
+1/sqrt(12 * n)
