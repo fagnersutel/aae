@@ -15,15 +15,15 @@ cor(autuacoes + monitores, ocupacao)
 
 fit1t <- lm(ocupacao ~ tarifa, data=mydata)
 summary(fit1t) # show results
-plot(ocupacao,tarifa,col = "blue",main = "Relação Tarifa vs Oucpação na AAE",
+plot(ocupacao,tarifa,col = "blue",main = "Rela??o Tarifa vs Oucpa??o na AAE",
      abline(lm(tarifa~ocupacao)),cex = 1.3,pch = 16,
-     xlab = "Taxa de Ocupação %",ylab = "Tarifa")
+     xlab = "Taxa de Ocupa??o %",ylab = "Tarifa")
 
 fita <- lm(ocupacao ~ autuacoes, data=mydata)
 summary(fita) # show results
-plot(ocupacao,autuacoes,col = "blue",main = "Relação Autuações vs Ocupação na AAE",
+plot(ocupacao,autuacoes,col = "blue",main = "Rela????o Autua??es vs Ocupa??o na AAE",
      abline(lm(autuacoes~ocupacao)),cex = 1.3,pch = 16,
-     xlab = "Taxa de Ocupação %",ylab = "Autuações * 1000")
+     xlab = "Taxa de Ocupa??o %",ylab = "Autua??es * 1000")
 monitoreslog <- log(monitores)
 monitores
 ocupacaolog <- log(ocupacao)
@@ -33,16 +33,16 @@ autuacoeslog
 
 fitb <- lm(ocupacaolog ~ autuacoeslog)
 summary(fitb) # show results
-plot(ocupacaolog,autuacoeslog,col = "blue",main = "Relação Autuações vs Oucpação na AAE",
+plot(ocupacaolog,autuacoeslog,col = "blue",main = "Rela??o Autua??es vs Oucpa??o na AAE",
      abline(lm(autuacoeslog~ocupacaolog)),cex = 1.3,pch = 16,
-     xlab = "Taxa de Ocupação %",ylab = "Autuações * 1000")
+     xlab = "Taxa de Ocupa??o %",ylab = "Autua??es * 1000")
 
 
 fitc <- lm(ocupacao ~ monitores, data=mydata)
 summary(fitc) # show results
-plot(ocupacao,monitores,col = "blue",main = "Relação nº Monitores vs Ocupação na AAE",
+plot(ocupacao,monitores,col = "blue",main = "Rela??o n? Monitores vs Ocupa??o na AAE",
      abline(lm(monitores~ocupacao)),cex = 1.3,pch = 16,
-     xlab = "Taxa de Ocupação %",ylab = "Nº de Monitores")
+     xlab = "Taxa de Ocupa??o %",ylab = "N? de Monitores")
 
 
 
@@ -90,7 +90,7 @@ layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page
 plot(fit)
 
 
-h<-hist(autuacoes, col="red", xlab="Numero de Autuações", main="Histograma") 
+h<-hist(autuacoes, col="red", xlab="Numero de Autua??es", main="Histograma") 
 xfit<-seq(min(autuacoes),max(autuacoes),length=40)
 yfit<-dnorm(xfit,mean=mean(autuacoes),sd=sd(autuacoes))
 yfit <- yfit*diff(h$mids[1:2])*length(autuacoes)
@@ -108,12 +108,12 @@ lines(ocupacao, col="red", lwd=2)
 
 monitoreslog <- log(monitores)
 monitores
-ocupaçãolog <- log(ocupacao)
-ocupaçãolog
+ocupa??olog <- log(ocupacao)
+ocupa??olog
 autuacoeslog <- log(autuacoes)
 autuacoeslog
 
-fit <- lm(ocupaçãolog ~ monitores + autuacoeslog + monitores * autuacoeslog)
+fit <- lm(ocupa??olog ~ monitores + autuacoeslog + monitores * autuacoeslog)
 summary(fit) # show results
 
 fit <- lm(ocupacao ~ monitores + autuacoes)
@@ -127,18 +127,20 @@ fit <- lm(ocupacao ~ monitores +  tarifa)
 summary(fit) # show results
 
 
-fit <- lm(ocupaçãolog ~ monitores + autuacoeslog + monitores * autuacoeslog)
+fit <- lm(ocupa??olog ~ monitores + autuacoeslog + monitores * autuacoeslog)
 summary(fit) # show results
 
 mydata$tarifa <- NULL
 head(mydata)
-plot(mydata,  pch=16, col="blue", main="Matriz de Dispersão")
+plot(mydata,  pch=16, col="blue", main="Matriz de Dispers?o")
 
-#install.packages('rgl')
+#install.packages('rgl', dependencies = TRUE)
+library(rgl)
 require(rgl) 
 require(car) 
 tarifa <- as.numeric(tarifa)
-scatter3d(ocupacao ~ monitores + autuacoes, radius=tarifa, point.col = tarifa, data=mydata)
+colors <- c("#999999", "#E69F00", "#56B4E9")
+scatter3d(ocupacao ~ monitores + autuacoes, radius=tarifa, point.col = tarifa, color=colors, data=mydata)
 tarifa <- as.factor(tarifa)
 scatter3d(ocupacao ~ monitores + autuacoes,  groups = tarifa, data=mydata)
 
