@@ -137,7 +137,11 @@ plot(mydata,  pch=16, col="blue", main="Matriz de Dispersão")
 #install.packages('rgl')
 require(rgl) 
 require(car) 
-scatter3d(ocupacao ~ monitores + autuacoes, radius=tarifa, data=mydata)
+tarifa <- as.numeric(tarifa)
+scatter3d(ocupacao ~ monitores + autuacoes, radius=tarifa, point.col = tarifa, data=mydata)
+tarifa <- as.factor(tarifa)
+scatter3d(ocupacao ~ monitores + autuacoes,  groups = tarifa, data=mydata)
+
 
 scatter3d(ocupacao ~ monitores + autuacoes  | ocupacao, radius=tarifa, surface=FALSE, data=mydata)
 
