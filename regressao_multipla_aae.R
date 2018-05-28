@@ -1,7 +1,7 @@
 # Multiple Linear Regression Example 
 tarifa <- c(1.5, 1.5, 2, 2, 2)
 ocupacao <- c(29.3, 28.5, 14.57, 13.44, 16.8)
-monitores <- c(88, 75, 30, 15, 7)
+monitores <- c(88.0, 75.0, 30.0, 15.0, 7.0)
 autuacoes <- c(6.6, 14.7, 9.3, 6.2, 23.6)
 mydata <- cbind(monitores, autuacoes, ocupacao, tarifa)
 mydata <- as.data.frame(mydata)
@@ -15,15 +15,15 @@ cor(autuacoes + monitores, ocupacao)
 
 fit1t <- lm(ocupacao ~ tarifa, data=mydata)
 summary(fit1t) # show results
-plot(ocupacao,tarifa,col = "blue",main = "Rela??o Tarifa vs Oucpa??o na AAE",
+plot(ocupacao,tarifa,col = "blue",main = "Relação Tarifa vs % Ocupação na AAE",
      abline(lm(tarifa~ocupacao)),cex = 1.3,pch = 16,
-     xlab = "Taxa de Ocupa??o %",ylab = "Tarifa")
+     xlab = "% Ocupação",ylab = "Tarifa R$")
 
 fita <- lm(ocupacao ~ autuacoes, data=mydata)
 summary(fita) # show results
-plot(ocupacao,autuacoes,col = "blue",main = "Rela????o Autua??es vs Ocupa??o na AAE",
+plot(ocupacao,autuacoes,col = "blue",main = "Relação Autuações vs % Ocupação na AAE",
      abline(lm(autuacoes~ocupacao)),cex = 1.3,pch = 16,
-     xlab = "Taxa de Ocupa??o %",ylab = "Autua??es * 1000")
+     xlab = "% Ocupação",ylab = "Nº Autuações * 1000")
 monitoreslog <- log(monitores)
 monitores
 ocupacaolog <- log(ocupacao)
@@ -40,18 +40,26 @@ plot(ocupacaolog,autuacoeslog,col = "blue",main = "Rela??o Autua??es vs Oucpa??o
 
 fitc <- lm(ocupacao ~ monitores, data=mydata)
 summary(fitc) # show results
-plot(ocupacao,monitores,col = "blue",main = "Rela??o n? Monitores vs Ocupa??o na AAE",
+plot(ocupacao,monitores,col = "blue",main = "Relação nº Monitores vs % Ocupação na AAE",
      abline(lm(monitores~ocupacao)),cex = 1.3,pch = 16,
-     xlab = "Taxa de Ocupa??o %",ylab = "N? de Monitores")
+     xlab = "% Ocupação",ylab = "Nº de Monitores")
 
 
 
 fit2 <- lm(ocupacao ~ monitores + autuacoes + tarifa, data=mydata)
-summary(fit2) # show results
-
+summary(lm(ocupacao ~ monitores + autuacoes + tarifa, data=mydata)) # show results
+shapiro.test(rstandard(lm(ocupacao ~ monitores + autuacoes + tarifa, data=mydata)))
+anova(fit2)
 
 fit3 <- lm(ocupacao ~ monitores + autuacoes, data=mydata)
 summary(fit3) # show results
+shapiro.test(rstandard(lm(ocupacao ~ monitores + autuacoes, data=mydata)))
+anova(fit3)
+
+fit4 <- lm(ocupacao ~ monitores + tarifa, data=mydata)
+summary(fit4) # show results
+shapiro.test(rstandard(lm(ocupacao ~ monitores + tarifa, data=mydata)))
+anova(fit4)
 
 # Other useful functions 
 coefficients(fit2) # model coefficients
@@ -63,15 +71,6 @@ vcov(fit2) # covariance matrix for model parameters
 influence(fit2) # regression diagnostics
 
 
-fit3 <- lm(ocupacao ~ monitores + autuacoes + monitores * autuacoes, data=mydata)
-summary(fit3) # show results
-
-fit4 <- lm(ocupacao ~ monitores + autuacoes, data=mydata)
-summary(fit4) # show results
-
-fit5 <- lm(ocupacao ~ monitores + tarifa, data=mydata)
-summary(fit5) # show results
-anova(fit5)
 
 
 
@@ -140,10 +139,39 @@ require(rgl)
 require(car) 
 tarifa <- as.numeric(tarifa)
 colors <- c("#999999", "#E69F00", "#56B4E9")
-scatter3d(ocupacao ~ monitores + autuacoes, radius=tarifa, point.col = tarifa, color=colors, data=mydata)
+scatter3d(ocupacao ~ monitores + autuacoes, radius=tarifa, point.col = tarifa, color=colors, data=mydata, xlab = NULL, zlab = NULL, ylab = NULL, axis.scales = FALSE)
+scatter3d(ocupacao ~ monitores + autuacoes, radius=tarifa, data=mydata, xlab = NULL, zlab = NULL, ylab = NULL)
 tarifa <- as.factor(tarifa)
 scatter3d(ocupacao ~ monitores + autuacoes,  groups = tarifa, data=mydata)
 
 
 scatter3d(ocupacao ~ monitores + autuacoes  | ocupacao, radius=tarifa, surface=FALSE, data=mydata)
 
+
+install.packages("scatterplot3d") # Install
+library("scatterplot3d") # load
+colors <- c("#999999", "#E69F00", "#56B4E9")
+colors <- colors[as.numeric(tarifa)]
+scatterplot3d(mydata, pch = 16, color=colors)
+
+
+library(car)
+ncvTest(lm(ocupacao ~ monitores))
+ncvTest(lm(ocupacao ~ tarifa))
+ncvTest(lm(ocupacao ~ autuacoes))
+ncvTest(lm(ocupacao ~ monitores +  tarifa))
+ncvTest(lm(ocupacao ~ monitores +  autuacoes))
+ncvTest(lm(ocupacao ~ monitores +  tarifa + autuacoes))
+lmtest::bptest(lm(ocupacao ~ monitores +  tarifa + autuacoes))
+
+
+shapiro.test(rstandard(lm(ocupacao ~  tarifa)))
+shapiro.test(rstandard(lm(ocupacao ~ autuacoes)))
+shapiro.test(rstandard(lm(ocupacao ~ monitores)))
+shapiro.test(rstandard(lm(ocupacao ~ monitores + autuacoes)))
+shapiro.test(rstandard(lm(ocupacao ~ monitores + tarifa)))
+                          
+
+shapiro.test(rstandard(lm(ocupacao ~ monitores + autuacoes + tarifa)))
+shapiro.test(rstandard(lm(ocupacao ~ monitores + autuacoes))) 
+shapiro.test(rstandard(lm(ocupacao ~ monitores + tarifa))) 
