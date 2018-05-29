@@ -12,18 +12,28 @@ cor(monitores, ocupacao)
 cor(autuacoes, ocupacao)
 cor(tarifa + autuacoes + monitores, ocupacao)
 cor(autuacoes + monitores, ocupacao)
-
+cor(tarifa + monitores, ocupacao)
+cor(tarifa + autuacoes, ocupacao)
+par(mfrow=c(1,3))
 fit1t <- lm(ocupacao ~ tarifa, data=mydata)
 summary(fit1t) # show results
 plot(ocupacao,tarifa,col = "blue",main = "Relação Tarifa vs % Ocupação na AAE",
-     abline(lm(tarifa~ocupacao)),cex = 1.3,pch = 16,
+     abline(lm(tarifa~ocupacao), col="red"),cex = 1.3,pch = 16,
      xlab = "% Ocupação",ylab = "Tarifa R$")
 
-fita <- lm(ocupacao ~ autuacoes, data=mydata)
-summary(fita) # show results
+fit2t <- lm(ocupacao ~ autuacoes, data=mydata)
+summary(fit2t) # show results
 plot(ocupacao,autuacoes,col = "blue",main = "Relação Autuações vs % Ocupação na AAE",
-     abline(lm(autuacoes~ocupacao)),cex = 1.3,pch = 16,
+     abline(lm(autuacoes~ocupacao), col="red"),cex = 1.3,pch = 16,
      xlab = "% Ocupação",ylab = "Nº Autuações * 1000")
+
+fit3t <- lm(ocupacao ~ monitores, data=mydata)
+summary(fit3t) # show results
+plot(ocupacao,monitores,col = "blue",main = "Relação Monitores vs % Ocupação na AAE",
+     abline(lm(monitores~ocupacao), col="red"),cex = 1.3,pch = 16,
+     xlab = "% Ocupação",ylab = "Nº Monitores")
+
+
 monitoreslog <- log(monitores)
 monitores
 ocupacaolog <- log(ocupacao)
@@ -36,7 +46,7 @@ summary(fitb) # show results
 plot(ocupacaolog,autuacoeslog,col = "blue",main = "Rela??o Autua??es vs Oucpa??o na AAE",
      abline(lm(autuacoeslog~ocupacaolog)),cex = 1.3,pch = 16,
      xlab = "Taxa de Ocupa??o %",ylab = "Autua??es * 1000")
-
+cor(ocupacaolog, autuacoeslog)
 
 fitc <- lm(ocupacao ~ monitores, data=mydata)
 summary(fitc) # show results
@@ -106,11 +116,13 @@ lines(ocupacao, col="red", lwd=2)
 
 
 monitoreslog <- log(monitores)
-monitores
-ocupa??olog <- log(ocupacao)
-ocupa??olog
-autuacoeslog <- log(autuacoes)
+monitoreslog
+ocupacaolog <- log(ocupacao)
+ocupacaolog
+autuacoeslog <- log(as.numeric(autuacoes))
 autuacoeslog
+tarifalog <- log(as.numeric(tarifa))
+tarifalog
 
 fit <- lm(ocupa??olog ~ monitores + autuacoeslog + monitores * autuacoeslog)
 summary(fit) # show results
@@ -147,12 +159,33 @@ scatter3d(ocupacao ~ monitores + autuacoes,  groups = tarifa, data=mydata)
 
 scatter3d(ocupacao ~ monitores + autuacoes  | ocupacao, radius=tarifa, surface=FALSE, data=mydata)
 
+mydata$tarifa <- NULL
 
-install.packages("scatterplot3d") # Install
+par(mfrow=c(1,1))
+#install.packages("scatterplot3d") # Install
 library("scatterplot3d") # load
-colors <- c("#999999", "#E69F00", "#56B4E9")
+colors <- c("#999999", "#E69F00")
 colors <- colors[as.numeric(tarifa)]
 scatterplot3d(mydata, pch = 16, color=colors)
+mydata <- cbind(tarifa, mydata)
+head(mydata)
+
+shapes = c(16, 17) 
+shapes <- shapes[as.numeric(tarifa)]
+
+colors <- c("red", "green")
+colors <- colors[as.numeric(tarifa)]
+
+s3d <- scatterplot3d(mydata, pch = shapes,  type = "h",color=colors, cex.symbols=2,
+                     main = "Gráfico de Flutuações")
+my.lm  <- with(mydata, lm(ocupacao ~ monitores + autuacoes))
+my.lm2 <- lm(ocupacao ~ monitores + tarifa)
+s3d$plane3d(my.lm, col='blue')
+s3d$plane3d(my.lm2, col='red')
+
+
+
+
 
 
 library(car)
@@ -170,8 +203,29 @@ shapiro.test(rstandard(lm(ocupacao ~ autuacoes)))
 shapiro.test(rstandard(lm(ocupacao ~ monitores)))
 shapiro.test(rstandard(lm(ocupacao ~ monitores + autuacoes)))
 shapiro.test(rstandard(lm(ocupacao ~ monitores + tarifa)))
-                          
+
 
 shapiro.test(rstandard(lm(ocupacao ~ monitores + autuacoes + tarifa)))
 shapiro.test(rstandard(lm(ocupacao ~ monitores + autuacoes))) 
 shapiro.test(rstandard(lm(ocupacao ~ monitores + tarifa))) 
+
+
+
+par(mfrow=c(1,3))
+fit1t <- lm(ocupacaolog ~ tarifalog)
+summary(fit1t) # show results
+plot(ocupacaolog,tarifalog,col = "blue",main = "Relação Tarifa vs % Ocupação na AAE",
+     abline(lm(tarifalog~ocupacaolog), col="red"),cex = 1.3,pch = 16,
+     xlab = "% Ocupação",ylab = "Tarifa R$")
+
+fit2t <- lm(ocupacaolog ~ autuacoeslog, data=mydata)
+summary(fit2t) # show results
+plot(ocupacaolog,autuacoeslog,col = "blue",main = "Relação Autuações vs % Ocupação na AAE",
+     abline(lm(autuacoeslog~ocupacaolog), col="red"),cex = 1.3,pch = 16,
+     xlab = "% Ocupação",ylab = "Nº Autuações * 1000")
+
+fit3t <- lm(ocupacaolog ~ monitoreslog, data=mydata)
+summary(fit3t) # show results
+plot(ocupacaolog,monitoreslog,col = "blue",main = "Relação Monitores vs % Ocupação na AAE",
+     abline(lm(monitoreslog~ocupacaolog), col="red"),cex = 1.3,pch = 16,
+     xlab = "% Ocupação",ylab = "Nº Monitores")
