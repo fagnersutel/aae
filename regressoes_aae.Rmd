@@ -1,0 +1,93 @@
+---
+title: "Análise AAE"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Monitores vs Ocupação
+
+Está abordagem observa o resultado da taxa de ocupação em função do número de orientadores de AAE.  
+Dataser.  
+```{r monitores}
+x <- c(76, 93, 86, 98, 90, 75, 30, 15, 7, 88)
+y <- c(32, 46, 48, 37, 38, 29, 15, 13, 17, 29)
+```
+
+
+Verificamos a correlação entre os dados.
+
+```{r}
+cor(x, y)
+```
+
+Verificação de boxplots.
+
+```{r}
+par(mfrow=c(1, 2))  # divide o grafico em duas colunas
+
+boxplot(x, main="Monitores", sub=paste("Outliers em monitores: ", paste(boxplot.stats(x)$out, collapse=" ")))  # box plot monitores
+
+boxplot(y, main="Ocupação", sub=paste("Outliers na ocupaçãos: ", paste(boxplot.stats(y)$out, collapse=" ")))  # box plot ocupação
+
+```
+    
+Verificação d densidade.  
+
+```{r}
+library(e1071)
+
+par(mfrow=c(1, 2))  # dividimos  a área grafica em duas colunas
+
+# Plotamos a densidade do numero de monitores
+
+plot(density(x), main="Densidade: Monitores", ylab="Frequencia", sub=paste("Assimetria:", round(e1071::skewness(x), 2)))
+
+polygon(density(x), col="red")
+
+# Plotamos a densidade da taxa de Ocupação
+
+plot(density(y), main="Densidade: Ocupação", ylab="Frequencia", sub=paste("Assimetria:", round(e1071::skewness(y), 2)))
+
+polygon(density(y), col="red")
+```
+
+
+Plotamos os dados.
+
+```{r grafico}
+plot(y,x,col = "blue",main = "Relação Monitores vs Oucpação na AAE",
+     abline(lm(x~y)),cex = 1.3,pch = 16,
+     xlab = "Taxa de Ocupação %",ylab = "Nº Monitores")
+```
+
+Verificamos as métricas.  
+
+```{r correlacoes}
+relation <- lm(x~y)
+print(summary(relation))
+```
+
+```{r}
+ layout(matrix(1:4,2,2))
+ plot(relation) 
+```
+
+
+Dispersão.  
+
+```{r}
+library(tidyverse)
+library(broom)
+theme_set(theme_classic())
+model.diag.metrics <- augment(relation)
+head(model.diag.metrics)
+
+ggplot(model.diag.metrics, aes(x, y)) +
+  geom_point() +
+  stat_smooth(method = lm, se = FALSE) +
+  geom_segment(aes(xend = x, yend = .fitted), color = "red", size = 0.3)
+```
+
